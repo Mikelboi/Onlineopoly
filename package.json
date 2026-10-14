@@ -19,6 +19,8 @@
     },
     "homepage": "https://github.com/Mikelboi/onlineopoly#readme",
     "dependencies": {
+        "bcrypt": "^6.0.0",
+        "dotenv": "^18.0.7",
         "mysql2": "^3.24.6"
     }
 }

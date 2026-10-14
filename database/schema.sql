@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `onlineopoly`.`Game_Transaction` (
     FOREIGN KEY (`player_id`, `game_id`)
     REFERENCES `onlineopoly`.`Player` (`player_id`, `game_id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON UPDATE NO ACTION
 ) ENGINE = InnoDB;
 
 SET SQL_MODE=@OLD_SQL_MODE;

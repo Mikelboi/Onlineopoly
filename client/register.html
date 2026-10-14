@@ -17,5 +17,39 @@
 
         <button type="submit">Create Account</button>
     </form>
+    <p id="register-message"></p>
+    <script>
+    const form = document.getElementById('register-form');
+    const message = document.getElementById('register-message');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        message.textContent = 'Creating account...';
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            message.textContent = result.message;
+
+            if (response.ok) {
+                form.reset();
+            }
+        } catch (error) {
+            message.textContent =
+                'Could not connect to the server. Please try again.';
+        }
+    });
+</script>
 </body>
 </html>
