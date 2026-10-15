@@ -1,23 +1,117 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Onlineopoly - Register</title>
+    <title>Onlineopoly - Create Account</title>
+
+    <style>
+        body {
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color: #c2eccd;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            background-color: white;
+            border: 5px solid black;
+            border-radius: 25px;
+            padding: 30px;
+            width: 320px;
+        }
+
+        h1 {
+            color: #f48859;
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #800;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e52521;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #bd1c19;
+        }
+
+        .account-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #1763a5;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Onlineopoly</h1>
-    <p>Create an account to start playing!</p>
+    <div class="login-box">
+        <h1>ONLINEOPOLY</h1>
+        <h2>Create an Account</h2>
 
-    <form id="register-form">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+        <form id="register-form">
+            <label for="username">Username</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Enter your username"
+                autocomplete="username"
+                required
+            >
 
-        <button type="submit">Create Account</button>
-    </form>
-    <p>Already have an account? <a href="/login">Log in here</a></p>
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="new-password"
+                minlength="8"
+                required
+            >
+
+            <button type="submit">Create Account</button>
+        </form>
+
+        <p id="register-message"></p>
+
+        <div class="account-link">
+            Already have an account?
+            <a href="/login">Log in here!</a>
+        </div>
+    </div>
     <script>
     const form = document.getElementById('register-form');
     const message = document.getElementById('register-message');

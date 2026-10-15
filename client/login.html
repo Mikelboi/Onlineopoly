@@ -1,28 +1,129 @@
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset=""UTF-8">
-        <meta name="viewport" content=""width=device-width, initial-scale="1.0">
-        <title>Onlineopoly - Log-in</title>
-    </head>
-    <body>
-        <h1>Onlineopoly</h1>
-        <p>Log in to start playing!</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onlineopoly - Log-in</title>
 
-        <form id="login-form"
+    <style>
+        body {
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif, sans-serif;
+            background-color: #c2eccd;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-box {
+            background-color: white;
+            border: 5px solid black;
+            border-radius: 25px;
+            padding: 30px;
+            width: 320px;
+        }
+
+        h1 {
+            color: #f48859;
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #800;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e52521;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #bd1c19;
+        }
+
+        .account-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #1763a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>ONLINEOPOLY</h1>
+        <h2>Log in</h2>
+
+        <form id="login-form">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" id="username" name="username"
+                   autocomplete="username" required>
 
-           <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   autocomplete="current-password" required>
 
-        <button type="submit">Log In</button>
-    </form>
+            <button type="submit">Log In</button>
+        </form>
 
-    <p id="login-message"></p>
+        <p id="login-message"></p>
 
-    <p>Don't have an account?
-        <a href="/register">Create an account</a>
-    </p>
+        <div class="account-link">
+            Don't have an account?
+            <a href="/register">Create an account</a>
+        </div>
+    </div>
+    
+<script>
+    const loginForm = document.getElementById('login-form');
+    const loginMessage = document.getElementById('login-message');
+
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            loginMessage.textContent = result.message;
+        } catch (error) {
+            loginMessage.textContent = 'Could not connect to the server.';
+        }
+    });
+</script>
 </body>
 </html>
