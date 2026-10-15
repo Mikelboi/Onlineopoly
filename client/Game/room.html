@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onlineopoly - Game Room</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f3f5;
+            margin: 0;
+            padding: 40px 20px;
+            color: #222;
+        }
+
+        .room-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .room-info {
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #player-list {
+            padding: 0;
+            list-style: none;
+        }
+
+        #player-list li {
+            padding: 12px;
+            margin: 8px 0;
+            background: #f7f7f7;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .room-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        #refresh-room {
+            background: #e2e6ea;
+        }
+
+        #start-game {
+            background: #238636;
+            color: white;
+        }
+
+        #room-message {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="room-container">
+        <h1>Onlineopoly</h1>
+        <h2>Game Room</h2>
+
+        <div class="room-info">
+            <p>Game ID: <strong id="game-id">Loading...</strong></p>
+            <p>Status: <strong id="game-status">Loading...</strong></p>
+            <p>Players: <strong id="player-count">0</strong></p>
+        </div>
+
+        <h2>Players in This Game</h2>
+        <ul id="player-list">
+            <li>Loading players...</li>
+        </ul>
+
+        <div class="room-buttons">
+            <button id="refresh-room">Refresh Room</button>
+            <button id="start-game">Start Game</button>
+        </div>
+
+        <p id="room-message"></p>
+    </main>
+
+    <script>
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get('gameId');
+
+    const gameIdElement = document.getElementById('game-id');
+    const gameStatusElement = document.getElementById('game-status');
+    const playerCountElement = document.getElementById('player-count');
+    const playerListElement = document.getElementById('player-list');
+    const roomMessageElement = document.getElementById('room-message');
+    const refreshButton = document.getElementById('refresh-room');
+    const startButton = document.getElementById('start-game');
+
+    async function loadRoom() {
+        if (!gameId) {
+            roomMessageElement.textContent =
+                'No game ID was provided in the URL.';
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/game-room?gameId=${encodeURIComponent(gameId)}`
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Could not load game room.');
+            }
+
+            gameIdElement.textContent = data.game.game_id;
+            gameStatusElement.textContent =
+                data.game.game_status === 'in_progress'
+                    ? 'In Progress'
+                    : data.game.game_status === 'waiting'
+                            ? 'Waiting'
+                            : data.game.game_status;
+            playerCountElement.textContent = data.players.length;
+
+            playerListElement.replaceChildren();
+
+            if (data.players.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No players have joined yet.';
+                playerListElement.appendChild(li);
+            } else {
+                 
+                data.players.forEach(player => {
+                    const li = document.createElement('li');
+                    li.textContent = player.player_name;
+                    playerListElement.appendChild(li);
+                });
+
+            }
+
+            roomMessageElement.textContent = '';
+        } catch (error) {
+            console.error('Error loading room:', error);
+            roomMessageElement.textContent = error.message;
+        }
+    }
+
+    refreshButton.addEventListener('click', loadRoom);
+    startButton.addEventListener('click', async () => {
+    console.log('Start Game button clicked!');
+    startButton.disabled = true;
+    roomMessageElement.textContent = 'Starting game...';
+
+    try {
+        const response = await fetch('/games/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                gameId: Number(gameId)
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || 'Could not start the game.'
+            );
+        }
+
+        roomMessageElement.textContent =
+            data.message || 'Game started successfully!';
+
+        await loadRoom();
+    } catch (error) {
+        console.error('Error starting game:', error);
+        roomMessageElement.textContent = error.message;
+        await loadRoom();
+    }
+});
+
+    loadRoom();
+</script>
+</body>
+</html>

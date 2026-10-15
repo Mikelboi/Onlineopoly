@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onlineopoly - Game Lobby</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 30px;
+            color: #222;
+        }
+
+        .menu {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: 1px solid #222;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #eaeaea;
+        }
+
+        .game {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 16px;
+            margin-top: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #message {
+            text-align: center;
+            min-height: 24px;
+        }
+
+        @media (max-width: 550px) {
+            body {
+                padding: 10px;
+            }
+
+            .menu {
+                padding: 18px;
+            }
+
+            .game {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="menu">
+        <h1>Onlineopoly</h1>
+        <h2>Game Lobby</h2>
+
+        <p id="welcome" style="text-align: center;">
+            Loading your account...
+        </p>
+
+        <div class="actions">
+            <button id="create-game">Create Game</button>
+            <button id="refresh-games">Refresh Games</button>
+        </div>
+
+        <p id="message" role="status"></p>
+
+        <h2>Available Games</h2>
+        <div id="game-list">
+            Loading games...
+        </div>
+    </main>
+
+    <script>
+       const message = document.getElementById('message');
+       const gameList = document.getElementById('game-list');
+
+async function loadLobby() {
+    try {
+        // Get the logged-in player's information
+        const sessionResponse = await fetch('/session');
+        const session = await sessionResponse.json();
+
+        if (!session.loggedIn) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Show the player's username, if the page has this element
+        const welcome = document.getElementById('welcome');
+        if (welcome) {
+            welcome.textContent = `Welcome, ${session.username}!`;
+        }
+
+        // Get the list of available games
+        await loadGames();
+
+    } catch (error) {
+        if (message) {
+            message.textContent = 'Could not load the lobby.';
+        }
+        console.error(error);
+    }
+}
+
+async function loadGames() {
+    const response = await fetch('/games');
+    const data = await response.json();
+
+    gameList.replaceChildren();
+
+    if (!data.games || data.games.length === 0) {
+        gameList.textContent = 'No games available. Create one!';
+        return;
+    }
+
+    data.games.forEach(game => {
+        const gameItem = document.createElement('div');
+
+        const gameInfo = document.createElement('p');
+        gameInfo.textContent =
+            `Game #${game.game_id} — Players: ${game.player_count}`;
+
+        const joinButton = document.createElement('button');
+        joinButton.textContent = 'Join Game';
+
+        joinButton.addEventListener('click', async () => {
+            try {
+                const joinResponse = await fetch('/games/join', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        gameId: game.game_id
+                    })
+                });
+
+                const result = await joinResponse.json();
+
+                if (!joinResponse.ok) {
+                    throw new Error(result.message || 'Could not join game.');
+                }
+
+                if (message) {
+                    message.textContent = result.message || 'Joined game!';
+                }
+
+                await loadGames();
+
+            } catch (error) {
+                if (message) {
+                    message.textContent = error.message;
+                }
+            }
+        });
+
+        gameItem.append(gameInfo, joinButton);
+        gameList.appendChild(gameItem);
+    });
+}
+
+const refreshButton = document.getElementById('refresh-games');
+
+if (refreshButton) {
+    refreshButton.addEventListener('click', loadGames);
+}
+
+loadLobby();
+
+const createButton = document.getElementById('create-game');
+
+if (createButton) {
+    createButton.addEventListener('click', async () => {
+        try {
+            if (message) {
+                message.textContent = 'Creating game...';
+            }
+
+            // Ask the server to create a game
+            const createResponse = await fetch('/games/create', {
+                method: 'POST'
+            });
+
+            const createdGame = await createResponse.json();
+
+            if (!createResponse.ok) {
+                throw new Error(
+                    createdGame.message || 'Could not create game.'
+                );
+            }
+
+            // Automatically join the newly created game
+            const joinResponse = await fetch('/games/join', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    gameId: createdGame.gameId
+                })
+            });
+
+            const joinedGame = await joinResponse.json();
+
+            if (!joinResponse.ok) {
+                throw new Error(
+                    joinedGame.message || 'Game created, but joining failed.'
+                );
+            }
+
+            if (message) {
+                message.textContent =
+                    `Game #${createdGame.gameId} created! You joined as the first player.`;
+            }
+
+            // Update the visible game list
+            await loadGames();
+
+        } catch (error) {
+            if (message) {
+                message.textContent = error.message;
+            }
+
+            console.error(error);
+        }
+    });
+}
+    </script>
+</body>
+</html>
