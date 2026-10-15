@@ -1,30 +1,32 @@
 
 require('./db');
 
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
-
 const db = require('./db');
+
 const PORT = 3000;
-const filePath = path.join(__dirname, '..', 'client', 'register.html');
+
+const loginPath = path.join(__dirname, '..', 'client', 'login.html');
+const registerPath = path.join(__dirname, '..', 'client', 'register.html');
 
 const server = http.createServer((req, res) => {
-    if (req.method === 'GET' && req.url === '/') {
-        fs.readFile(filePath, (err, data) => {
-            if (err) {
-                res.writeHead(500, { 'Content-Type': 'text/plain' });
-                res.end('Error loading registration page.');
-                return;
-            }
-
-            res.writeHead(200, { 'Content-Type': 'text/html' });
-            res.end(data);
-        });
+    // Display the login page first
+    if (req.method === 'GET' && (req.url === '/' || req.url === '/login')) {
+        servePage(loginPath, res);
         return;
     }
 
+    // Display the registration page
+    if (req.method === 'GET' && req.url === '/register') {
+        servePage(registerPath, res);
+        return;
+    }
+
+    // Create a new account
     if (req.method === 'POST' && req.url === '/register') {
         let body = '';
 
@@ -32,6 +34,8 @@ const server = http.createServer((req, res) => {
             body += chunk;
 
             if (body.length > 10000) {
+                res.writeHead(413, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'Request too large.' }));
                 req.destroy();
             }
         });
@@ -96,6 +100,20 @@ const server = http.createServer((req, res) => {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Not found.');
 });
+
+// Helper function for displaying HTML pages
+function servePage(filePath, res) {
+    fs.readFile(filePath, (err, data) => {
+        if (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Error loading page.');
+            return;
+        }
+
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data);
+    });
+}
 
 server.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
