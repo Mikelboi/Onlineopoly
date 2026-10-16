@@ -118,8 +118,15 @@
                 body: JSON.stringify({ username, password })
             });
 
+            
             const result = await response.json();
+
             loginMessage.textContent = result.message;
+
+            if (response.ok) {
+                window.location.href = '/menu';
+            }
+
         } catch (error) {
             loginMessage.textContent = 'Could not connect to the server.';
         }

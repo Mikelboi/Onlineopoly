@@ -14,10 +14,19 @@ const loginPath = path.join(__dirname, '..', 'client', 'Account', 'login.html');
 const registerPath = path.join(__dirname, '..', 'client', 'Account', 'register.html');
 const lobbyPath = path.join(__dirname, '..', 'client', 'Game', 'lobby.html');
 const roomPath = path.join(__dirname, '..', 'client', 'Game', 'room.html');
+const menuPath = path.join(__dirname, '..', 'client', 'Game', 'menu.html');
 
 const server = http.createServer((req, res) => {
-    if (req.method === 'GET' && (req.url === '/' || req.url === '/login')) {
+    console.log('Request received:', req.method, req.url);
+    const route = req.url.split('?')[0];
+
+    if (req.method === 'GET' && (route === '/' || route === '/login')) {
         servePage(loginPath, res);
+        return;
+    }
+
+    if (req.method === 'GET' && req.url.split('?')[0] === '/menu') {
+        servePage(menuPath, res);
         return;
     }
 

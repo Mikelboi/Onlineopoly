@@ -7,33 +7,53 @@
     <title>Onlineopoly - Game Room</title>
 
     <style>
+        
         body {
-            font-family: Arial, sans-serif;
-            background: #f1f3f5;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color: #c2eccd;
             margin: 0;
-            padding: 40px 20px;
+            min-height: 100vh;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             color: #222;
         }
 
         .room-container {
-            max-width: 700px;
-            margin: 0 auto;
-            padding: 30px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: white;
+            border: 5px solid black;
+            border-radius: 25px;
+            padding: 35px;
+            width: 700px;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
-        h1, h2 {
+        h1 {
+            color: #f48859;
             text-align: center;
+            font-size: 36px;
+            margin-top: 0;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 25px;
         }
 
         .room-info {
             padding: 15px;
-            background: #f7f7f7;
-            border-radius: 8px;
+            background-color: #f3f8f4;
+            border: 1px solid #c2eccd;
+            border-radius: 10px;
             text-align: center;
+        }
+
+        .room-info p {
+            margin: 10px 0;
+            font-size: 17px;
         }
 
         #player-list {
@@ -42,26 +62,63 @@
         }
 
         #player-list li {
-            padding: 12px;
-            margin: 8px 0;
-            background: #f7f7f7;
+            padding: 14px;
+            margin: 10px 0;
+            background-color: #f7f7f7;
             border: 1px solid #ddd;
             border-radius: 6px;
+            text-align: center;
+            font-size: 17px;
         }
 
         .room-buttons {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 15px;
             margin-top: 25px;
         }
 
         button {
-            padding: 12px 20px;
+            box-sizing: border-box;
+            flex: 1;
+            padding: 14px 20px;
+            background-color: #e52521;
+            color: white;
             border: none;
             border-radius: 6px;
+            font-family: inherit;
+            font-size: 17px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 15px;
+        }
+
+        button:hover {
+            background-color: #bd1c19;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        #room-message {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 500px) {
+            .room-container {
+                padding: 22px;
+            }
+
+            .room-buttons {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                flex: auto;
+            }
         }
 
         #refresh-room {

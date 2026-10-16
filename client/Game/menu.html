@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onlineopoly </title>
+
+    <style>
+        body {
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            background-color: #c2eccd;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .menu-box {
+            background-color: white;
+            border: 5px solid black;
+            border-radius: 25px;
+            padding: 45px;
+            width: 550px;
+            max-width: calc(100vw - 100px);
+            box-sizing: border-box;
+        }
+        
+
+        h1 {
+            color: #f48859;
+            text-align: center;
+        }
+
+        h2 {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin: 20px 0 25px 0;
+            padding: 0;
+            position: static;
+            box-sizing: border-box;
+        }
+
+        button {
+            box-sizing: border-box;
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e52521;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #bd1c19;
+        }
+
+        #message {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="menu-box">
+        <h1>ONLINEOPOLY</h1>
+        <h2 id="welcome-heading">Welcome!</h2>
+
+        <button id="play-local">Play Local</button>
+        <button id="play-online">Play Online</button>
+        <button id="how-to-play">How to Play</button>
+        <button id="Statistics">Statistics</button>
+        <button id="log-out">Log Out</button>
+
+        <p id="message" role="status"></p>
+    </main>
+
+    <script>
+        const message = document.getElementById('message');
+        const welcomeHeading = document.getElementById('welcome-heading');
+
+        async function loadUsername() {
+            try {
+                const response = await fetch('/session');
+
+                if (response.ok) {
+                    const result = await response.json();
+                    welcomeHeading.textContent = `Welcome, ${result.username}!`;
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                message.textContent = 'Could not load your username.';
+            }
+        }
+
+        loadUsername();
+        document.getElementById('play-online')
+            .addEventListener('click', () => {
+                window.location.href = '/lobby';
+            });
+
+        document.getElementById('how-to-play')
+            .addEventListener('click', () => {
+                message.textContent =
+                    'Join a game, take turns, buy properties, and build your fortune!';
+            });
+
+        document.getElementById('log-out')
+            .addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/logout', {
+                        method: 'POST'
+                    });
+
+                    if (response.ok) {
+                        window.location.href = '/login';
+                    } else {
+                        message.textContent =
+                            'Could not log out. Please try again.';
+                    }
+                } catch (error) {
+                    message.textContent =
+                        'Could not connect to the server.';
+                }
+            });
+    </script>
+</body>
+</html>
