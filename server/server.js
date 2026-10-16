@@ -284,7 +284,8 @@ if (req.method === 'POST' && req.url === '/games/create') {
     }
 
     db.query(
-        "INSERT INTO `Game` (game_status, player_count) VALUES ('waiting', 0)",
+        "INSERT INTO `Game` (game_status, player_count, host_user_id) VALUES ('waiting', 0,?)",
+        [session.userId],
         (err, result) => {
             if (err) {
                 console.error('Create game error:', err);
@@ -653,7 +654,7 @@ if (req.method === 'GET' && req.url === '/games') {
         }
 
         db.query(
-            `SELECT game_id, game_status, player_count
+            `SELECT game_id, game_status, player_count,host_user_id
              FROM \`Game\`
              WHERE game_id = ?`,
             [gameId],
@@ -794,7 +795,7 @@ if (req.method === 'POST' && req.url === '/games/start') {
         }
 
         db.query(
-            `SELECT game_status FROM Game WHERE game_id = ?`,
+            `SELECT game_status, host_user_id FROM Game WHERE game_id = ?`,
             [gameId],
             (err, games) => {
                 if (err) {
@@ -814,6 +815,16 @@ if (req.method === 'POST' && req.url === '/games/start') {
                     });
                     res.end(JSON.stringify({
                         message: 'Game not found.'
+                    }));
+                    return;
+                }
+
+                if (Number(games[0].host_user_id) !== Number(session.userId)) {
+                    res.writeHead(403, {
+                        'Content-Type': 'application/json'
+                    });
+                    res.end(JSON.stringify({
+                        message: 'Only the host can start this game.'
                     }));
                     return;
                 }

@@ -130,6 +130,13 @@
             color: white;
         }
 
+        #start-game:disabled {
+            background-color: #999;
+            color: #eeeeee;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
         #room-message {
             text-align: center;
             margin-top: 20px;
@@ -148,7 +155,7 @@
             <p>Players: <strong id="player-count">0</strong></p>
         </div>
 
-        <h2>Players in This Game</h2>
+        <h2>Players List</h2>
         <ul id="player-list">
             <li>Loading players...</li>
         </ul>
@@ -156,6 +163,7 @@
         <div class="room-buttons">
             <button id="refresh-room">Refresh Room</button>
             <button id="start-game">Start Game</button>
+            <button id="Back to Games">Back to Online Games</button>
         </div>
 
         <p id="room-message"></p>
@@ -172,6 +180,7 @@
     const roomMessageElement = document.getElementById('room-message');
     const refreshButton = document.getElementById('refresh-room');
     const startButton = document.getElementById('start-game');
+    const backButton = document.getElementById('Back to Games');
 
     async function loadRoom() {
         if (!gameId) {
@@ -200,6 +209,22 @@
                             : data.game.game_status;
             playerCountElement.textContent = data.players.length;
 
+        startButton.disabled = true;
+
+        const sessionResponse = await fetch('/session');
+        const sessionData = await sessionResponse.json();
+
+        const isHost =
+            Number(data.game.host_user_id) === Number(sessionData.userId);
+
+        startButton.disabled =
+            !isHost || data.game.game_status !== 'waiting';
+
+        console.log('Logged-in player ID:', sessionData.userId);
+        console.log('Host ID:', data.game.host_user_id);
+        console.log('Is host:', isHost);
+        console.log('Button disabled:', startButton.disabled);
+
             playerListElement.replaceChildren();
 
             if (data.players.length === 0) {
@@ -224,6 +249,9 @@
     }
 
     refreshButton.addEventListener('click', loadRoom);
+    backButton.addEventListener('click', () => {
+    window.location.href = '/lobby';
+    });
     startButton.addEventListener('click', async () => {
     console.log('Start Game button clicked!');
     startButton.disabled = true;

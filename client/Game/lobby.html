@@ -183,6 +183,7 @@ async function loadGames() {
 
     data.games.forEach(game => {
         const gameItem = document.createElement('div');
+        gameItem.className = 'game';
 
         const gameInfo = document.createElement('p');
         gameInfo.textContent =
@@ -191,41 +192,46 @@ async function loadGames() {
         const joinButton = document.createElement('button');
         joinButton.textContent = 'Join Game';
 
-        joinButton.addEventListener('click', async () => {
-            try {
-                const joinResponse = await fetch('/games/join', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        gameId: game.game_id
-                    })
-                });
+    joinButton.addEventListener('click', async () => {
+    try {
+        message.textContent = 'Joining game...';
 
-                const result = await joinResponse.json();
-
-                if (!joinResponse.ok) {
-                    throw new Error(result.message || 'Could not join game.');
-                }
-
-                if (message) {
-                    message.textContent = result.message || 'Joined game!';
-                }
-
-                await loadGames();
-
-            } catch (error) {
-                if (message) {
-                    message.textContent = error.message;
-                }
-            }
+        const joinResponse = await fetch('/games/join', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                gameId: game.game_id
+            })
         });
+
+        const result = await joinResponse.json();
+
+        console.log('Join response:', joinResponse.status, result);
+
+        if (!joinResponse.ok) {
+            throw new Error(
+                result.message || 'Could not join game.'
+            );
+        }
+
+        const roomUrl = `/room?gameId=${game.game_id}`;
+        console.log('Navigating to:', roomUrl);
+
+        window.location.assign(roomUrl);
+
+    } catch (error) {
+        message.textContent = error.message;
+        console.error('Join game failed:', error);
+    }
+});
 
         gameItem.append(gameInfo, joinButton);
         gameList.appendChild(gameItem);
     });
 }
+
 
 const refreshButton = document.getElementById('refresh-games');
 
@@ -280,6 +286,8 @@ if (createButton) {
                 message.textContent =
                     `Game #${createdGame.gameId} created! You joined as the first player.`;
             }
+
+            window.location.href = `/room?gameId=${createdGame.gameId}`;
 
             // Update the visible game list
             await loadGames();
